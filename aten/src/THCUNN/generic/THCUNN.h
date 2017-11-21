@@ -683,7 +683,8 @@ TH_API void THNN_(SpatialConvolutionLocalBatch_accGradParameters)(
 		  int dW, int dH,
 		  int padW, int padH,
 		  int64_t inputWidth, int64_t inputHeight,
-		  int64_t outputWidth, int64_t outputHeight);
+		  int64_t outputWidth, int64_t outputHeight,
+		  accreal scale);
 
 TH_API void THNN_(SpatialConvolutionMM_updateOutput)(
                   THCState *state,
