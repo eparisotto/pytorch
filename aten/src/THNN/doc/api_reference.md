@@ -51,6 +51,7 @@ These are all modules implemented in THNN:
 * [SpatialAveragePooling](#spatialaveragepooling)
 * [SpatialBatchNormalization](#spatialbatchnormalization)
 * [SpatialConvolutionLocal](#spatialconvolutionlocal)
+* [SpatialConvolutionLocalBatch](#spatialconvolutionlocalbatch)
 * [SpatialConvolutionMM](#spatialconvolutionmm)
 * [SpatialConvolutionMap](#spatialconvolutionmap)
 * [SpatialFractionalMaxPooling](#spatialfractionalmaxpooling)
@@ -872,6 +873,53 @@ void THNN_SpatialConvolutionLocal_updateGradInput(
 ```
 ```C
 void THNN_SpatialConvolutionLocal_accGradParameters(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradWeight,
+          THTensor *gradBias,
+          THTensor *finput,
+          THTensor *fgradInput,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
+          int64_t inputWidth, int64_t inputHeight,
+          int64_t outputWidth, int64_t outputHeight,
+          real scale);
+```
+## SpatialConvolutionLocalBatch
+```C
+void THNN_SpatialConvolutionLocalBatch_updateOutput(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          THTensor *bias,
+          THTensor *finput,
+          THTensor *fgradInput,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
+          int64_t inputWidth, int64_t inputHeight,
+          int64_t outputWidth, int64_t outputHeight);
+```
+```C
+void THNN_SpatialConvolutionLocalBatch_updateGradInput(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THTensor *finput,
+          THTensor *fgradInput,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
+          int64_t inputWidth, int64_t inputHeight,
+          int64_t outputWidth, int64_t outputHeight);
+```
+```C
+void THNN_SpatialConvolutionLocalBatch_accGradParameters(
           THNNState *state,
           THTensor *input,
           THTensor *gradOutput,
