@@ -7,8 +7,8 @@ static inline void THNN_(SpatialConvolutionLocalBatch_shapeCheck)(
     THTensor *weight, THTensor *bias,
     int kH, int kW, int dH,
     int dW, int padH, int padW,
-    long inputHeight, long inputWidth,
-    long outputHeight, long outputWidth) {
+    int64_t inputHeight, int64_t inputWidth,
+    int64_t outputHeight, int64_t outputWidth) {
 
   THArgCheck(kW > 0 && kH > 0, 9,
            "kernel size should be greater than zero, but got kH: %d kW: %d", kH, kW);
@@ -29,8 +29,8 @@ static inline void THNN_(SpatialConvolutionLocalBatch_shapeCheck)(
   THNN_ARGCHECK(ndim == 3 || ndim == 4, 2, input,
         "3D or 4D input tensor expected but got: %s");
 
-  long nInputPlane = weight->size[3] / (kH * kW);
-  long nOutputPlane = weight->size[2];
+  int64_t nInputPlane = weight->size[3] / (kH * kW);
+  int64_t nOutputPlane = weight->size[2];
 
   if (bias != NULL) {
     THNN_CHECK_DIM_SIZE(bias, 4, 1, nOutputPlane);
@@ -53,10 +53,10 @@ static THTensor* THNN_(view_weight_local_batch)(THTensor *_weight)
   THArgCheck(weight->nDimension == 4 || weight->nDimension == 7, 4,
           "weight tensor should be 4D or 7D - got %dD", weight->nDimension);
   if (weight->nDimension == 7) {
-	 long s1 = weight->size[0];
-	 long s2 = weight->size[1] * weight->size[2];
-    long s3 = weight->size[3];
-    long s4 = weight->size[4] * weight->size[5] * weight->size[6];
+	 int64_t s1 = weight->size[0];
+	 int64_t s2 = weight->size[1] * weight->size[2];
+    int64_t s3 = weight->size[3];
+    int64_t s4 = weight->size[4] * weight->size[5] * weight->size[6];
     THTensor *old_weight = weight;
     weight = THTensor_(newWithStorage4d)(weight->storage,
                        weight->storageOffset,
@@ -71,10 +71,10 @@ static void THNN_(SpatialConvolutionLocalBatch_updateOutput_frame)
       THTensor *input, THTensor *output,
       THTensor *weight, THTensor *bias, THTensor *finput,
       int kW, int kH, int dW, int dH, int padW, int padH,
-      long nInputPlane, long inputWidth, long inputHeight,
-      long nOutputPlane, long outputWidth, long outputHeight)
+      int64_t nInputPlane, int64_t inputWidth, int64_t inputHeight,
+      int64_t nOutputPlane, int64_t outputWidth, int64_t outputHeight)
 {
-  long i;
+  int64_t i;
   THTensor *output3d, *finput3d;
 
   THNN_(unfolded_copy)(finput, input, kW, kH, dW, dH, padW, padH,
@@ -115,8 +115,8 @@ void THNN_(SpatialConvolutionLocalBatch_updateOutput)(
     int kW, int kH,
     int dW, int dH,
     int padW, int padH,
-    long inputWidth, long inputHeight,
-    long outputWidth, long outputHeight)
+    int64_t inputWidth, int64_t inputHeight,
+    int64_t outputWidth, int64_t outputHeight)
 {
   weight = THNN_(view_weight_local_batch)(weight);
 
@@ -126,8 +126,8 @@ void THNN_(SpatialConvolutionLocalBatch_updateOutput)(
 
   input = THTensor_(newContiguous)(input);
 
-  long nInputPlane = THTensor_(size)(weight, 3)/ (kW * kH);
-  long nOutputPlane = THTensor_(size)(weight, 2);
+  int64_t nInputPlane = THTensor_(size)(weight, 3)/ (kW * kH);
+  int64_t nOutputPlane = THTensor_(size)(weight, 2);
 
   if(input->nDimension == 3)
   {
@@ -144,8 +144,8 @@ void THNN_(SpatialConvolutionLocalBatch_updateOutput)(
   }
   else
   {
-    long T = input->size[0];
-    long t;
+    int64_t T = input->size[0];
+    int64_t t;
 
     THTensor_(resize3d)(finput, T, kW*kH*nInputPlane, outputHeight*outputWidth);
     THTensor_(resize4d)(output, T, nOutputPlane, outputHeight, outputWidth);
@@ -182,8 +182,8 @@ static void THNN_(SpatialConvolutionLocalBatch_updateGradInput_frame)
      (THTensor *gradInput, THTensor *gradOutput,
       THTensor *weight, THTensor *fgradInput,
       int kW, int kH, int dW, int dH, int padW, int padH,
-      long nInputPlane, long inputWidth, long inputHeight,
-      long nOutputPlane, long outputWidth, long outputHeight)
+      int64_t nInputPlane, int64_t inputWidth, int64_t inputHeight,
+      int64_t nOutputPlane, int64_t outputWidth, int64_t outputHeight)
 {
   THTensor *gradOutput3d, *fgradInput3d;
   gradOutput3d = THTensor_(newWithStorage3d)(gradOutput->storage, gradOutput->storageOffset,
@@ -221,8 +221,8 @@ void THNN_(SpatialConvolutionLocalBatch_updateGradInput)(
     int kW, int kH,
     int dW, int dH,
     int padW, int padH,
-    long inputWidth, long inputHeight,
-    long outputWidth, long outputHeight)
+    int64_t inputWidth, int64_t inputHeight,
+    int64_t outputWidth, int64_t outputHeight)
 {
   weight = THNN_(view_weight_local_batch)(weight);
 
@@ -232,8 +232,8 @@ void THNN_(SpatialConvolutionLocalBatch_updateGradInput)(
 
   input = THTensor_(newContiguous)(input);
   gradOutput = THTensor_(newContiguous)(gradOutput);
-  long nInputPlane = THTensor_(size)(weight,3)/(kW*kH);
-  long nOutputPlane = THTensor_(size)(weight,2);
+  int64_t nInputPlane = THTensor_(size)(weight,3)/(kW*kH);
+  int64_t nOutputPlane = THTensor_(size)(weight,2);
 
   THTensor_(resizeAs)(gradInput, input);
   THTensor_(resizeAs)(fgradInput, finput);
@@ -253,8 +253,8 @@ void THNN_(SpatialConvolutionLocalBatch_updateGradInput)(
   }
   else
   {
-    long T = input->size[0];
-    long t;
+    int64_t T = input->size[0];
+    int64_t t;
 
 #pragma omp parallel for private(t)
     for(t = 0; t < T; t++)
@@ -287,8 +287,8 @@ static void THNN_(SpatialConvolutionLocalBatch_accGradParameters_frame)
      (THTensor *gradOutput, THTensor *gradWeight, THTensor *gradBias,
       THTensor *finput, real scale,
       int kW, int kH, int dW, int dH, int padW, int padH,
-      long nInputPlane, long inputWidth, long inputHeight,
-      long nOutputPlane, long outputWidth, long outputHeight)
+      int64_t nInputPlane, int64_t inputWidth, int64_t inputHeight,
+      int64_t nOutputPlane, int64_t outputWidth, int64_t outputHeight)
 {
 
   THTensor *gradOutput3d, *finput3d;
@@ -322,8 +322,8 @@ void THNN_(SpatialConvolutionLocalBatch_accGradParameters)(
     int kW, int kH,
     int dW, int dH,
     int padW, int padH,
-    long inputWidth, long inputHeight,
-    long outputWidth, long outputHeight,
+    int64_t inputWidth, int64_t inputHeight,
+    int64_t outputWidth, int64_t outputHeight,
     accreal scale_)
 {
   THArgCheck(THTensor_(isContiguous)(gradWeight), 4, "gradWeight needs to be contiguous");
@@ -338,8 +338,8 @@ void THNN_(SpatialConvolutionLocalBatch_accGradParameters)(
   input = THTensor_(newContiguous)(input);
   gradOutput = THTensor_(newContiguous)(gradOutput);
 
-  long nInputPlane = THTensor_(size)(gradWeight,3)/(kW*kH);
-  long nOutputPlane = THTensor_(size)(gradWeight,2);
+  int64_t nInputPlane = THTensor_(size)(gradWeight,3)/(kW*kH);
+  int64_t nOutputPlane = THTensor_(size)(gradWeight,2);
 
   if(input->nDimension == 3)
   {
@@ -354,10 +354,10 @@ void THNN_(SpatialConvolutionLocalBatch_accGradParameters)(
   }
   else
   {
-    long T = input->size[0];
-    long t;
+    int64_t T = input->size[0];
+    int64_t t;
 
-	 // no longer dependence between batches
+	 // no int64_ter dependence between batches
 //#pragma omp parallel for private(t)
     for(t = 0; t < T; t++)
     {
